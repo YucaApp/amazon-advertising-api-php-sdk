@@ -411,6 +411,8 @@ class Client
             array_push($headers, "Authorization: bearer {$this->config["accessToken"]}");
         }
 
+        array_push($headers, "Amazon-Advertising-API-ClientId: {$this->config["clientId"]}");
+
         if (!is_null($this->profileId)) {
             array_push($headers, "Amazon-Advertising-API-Scope: {$this->profileId}");
         }
@@ -433,6 +435,7 @@ class Client
     {
         $headers = array(
             "Authorization: bearer {$this->config["accessToken"]}",
+            "Amazon-Advertising-API-ClientId: {$this->config["clientId"]}",
             "Content-Type: application/json",
             "User-Agent: {$this->userAgent}"
         );
