@@ -1,4 +1,5 @@
 <?php
+
 namespace AmazonAdvertisingApi;
 
 require_once "../AmazonAdvertisingApi/Client.php";
@@ -13,7 +14,8 @@ class ClientTest extends \PHPUnit\Framework\TestCase
         "region" => "na",
         "accessToken" => "Atza%7Ctest",
         "refreshToken" => "Atzr%7Ctest",
-        "sandbox" => true);
+        "sandbox" => true
+    );
 
 
     public function setUp()
@@ -22,16 +24,17 @@ class ClientTest extends \PHPUnit\Framework\TestCase
             "code" => "200",
             "success" => true,
             "requestId" => "test",
-            "response" => "SUCCESS");
+            "response" => json_encode(["status" => "SUCCESS", "location" => ''])
+        );
 
         $this->client = $this->getMockBuilder("AmazonAdvertisingApi\Client")
-                             ->setConstructorArgs(array($this->config))
-                             ->setMethods(array("_executeRequest"))
-                             ->getMock();
+            ->setConstructorArgs(array($this->config))
+            ->setMethods(array("_executeRequest"))
+            ->getMock();
 
         $this->client->expects($this->any())
-             ->method("_executeRequest")
-             ->will($this->returnValue($this->return_value));
+            ->method("_executeRequest")
+            ->will($this->returnValue($this->return_value));
     }
 
 
@@ -386,28 +389,32 @@ class ClientTest extends \PHPUnit\Framework\TestCase
     public function testGetAdGroupKeywordSuggestions()
     {
         $request = $this->client->getAdGroupKeywordSuggestions(
-            array("adGroupId" => 12345));
+            array("adGroupId" => 12345)
+        );
         $this->assertEquals($this->return_value, $request);
     }
 
     public function testGetAdGroupKeywordSuggestionsEx()
     {
         $request = $this->client->getAdGroupKeywordSuggestionsEx(
-            array("adGroupId" => 12345));
+            array("adGroupId" => 12345)
+        );
         $this->assertEquals($this->return_value, $request);
     }
 
     public function testGetAsinKeywordSuggestions()
     {
         $request = $this->client->getAsinKeywordSuggestions(
-            array("asin" => 12345));
+            array("asin" => 12345)
+        );
         $this->assertEquals($this->return_value, $request);
     }
 
     public function testBulkGetAsinKeywordSuggestions()
     {
         $request = $this->client->bulkGetAsinKeywordSuggestions(
-            array("asins" => array("ASIN1", "ASIN2")));
+            array("asins" => array("ASIN1", "ASIN2"))
+        );
         $this->assertEquals($this->return_value, $request);
     }
 
@@ -432,6 +439,42 @@ class ClientTest extends \PHPUnit\Framework\TestCase
     public function testGetReport()
     {
         $request = $this->client->getReport("test");
+        $this->assertEquals($this->return_value, $request);
+    }
+
+    public function testListPortfolios()
+    {
+        $request = $this->client->listPortfolios();
+        $this->assertEquals($this->return_value, $request);
+    }
+
+    public function testListPortfoliosEx()
+    {
+        $request = $this->client->listPortfoliosEx();
+        $this->assertEquals($this->return_value, $request);
+    }
+
+    public function testGetPortfolio()
+    {
+        $request = $this->client->getPortfolio("test");
+        $this->assertEquals($this->return_value, $request);
+    }
+
+    public function testGetPortfolioEx()
+    {
+        $request = $this->client->getPortfolioEx("test");
+        $this->assertEquals($this->return_value, $request);
+    }
+
+    public function testCreatePortfolios()
+    {
+        $request = $this->client->createPortfolios("test");
+        $this->assertEquals($this->return_value, $request);
+    }
+
+    public function testUpdatePortfolios()
+    {
+        $request = $this->client->updatePortfolios("test");
         $this->assertEquals($this->return_value, $request);
     }
 }
