@@ -1,4 +1,5 @@
 <?php
+
 namespace AmazonAdvertisingApi;
 
 require_once "Versions.php";
@@ -13,7 +14,8 @@ class Client
         "region" => null,
         "accessToken" => null,
         "refreshToken" => null,
-        "sandbox" => false);
+        "sandbox" => false
+    );
 
     private $apiVersion = null;
     private $applicationVersion = null;
@@ -61,11 +63,12 @@ class Client
             "grant_type" => "refresh_token",
             "refresh_token" => $refresh_token,
             "client_id" => $this->config["clientId"],
-            "client_secret" => $this->config["clientSecret"]);
+            "client_secret" => $this->config["clientSecret"]
+        );
 
         $data = "";
         foreach ($params as $k => $v) {
-            $data .= "{$k}=".rawurlencode($v)."&";
+            $data .= "{$k}=" . rawurlencode($v) . "&";
         }
 
         $url = "https://{$this->tokenUrl}";
@@ -83,7 +86,7 @@ class Client
         if (array_key_exists("access_token", $response_array)) {
             $this->config["accessToken"] = $response_array["access_token"];
         } else {
-            $this->_logAndThrow("Unable to refresh token. 'access_token' not found in response. ". print_r($response, true));
+            $this->_logAndThrow("Unable to refresh token. 'access_token' not found in response. " . print_r($response, true));
         }
 
         return $response;
@@ -338,7 +341,8 @@ class Client
     {
         $data = array(
             "adGroupId" => $adGroupId,
-            "keywords" => $data);
+            "keywords" => $data
+        );
         return $this->_operation("keywords/bidRecommendations", $data, "POST");
     }
 
@@ -402,6 +406,36 @@ class Client
         return $req;
     }
 
+    public function listPortfolios($data = null)
+    {
+        return $this->_operation("portfolios", $data);
+    }
+
+    public function listPortfoliosEx($data = null)
+    {
+        return $this->_operation("portfolios/extended", $data);
+    }
+
+    public function getPortfolio($portfolioId)
+    {
+        return $this->_operation("portfolios/{$portfolioId}");
+    }
+
+    public function getPortfolioEx($portfolioId)
+    {
+        return $this->_operation("portfolios/extended/{$portfolioId}");
+    }
+
+    public function createPortfolios($data)
+    {
+        return $this->_operation("portfolios", $data, "POST");
+    }
+
+    public function updatePortfolios($data)
+    {
+        return $this->_operation("portfolios", $data, "PUT");
+    }
+
     private function _download($location, $gunzip = false)
     {
         $headers = array();
@@ -454,7 +488,7 @@ class Client
                 if (!empty($params)) {
                     $url .= "?";
                     foreach ($params as $k => $v) {
-                        $url .= "{$k}=".rawurlencode($v)."&";
+                        $url .= "{$k}=" . rawurlencode($v) . "&";
                     }
                     $url = rtrim($url, "&");
                 }
@@ -499,15 +533,19 @@ class Client
                     $requestId = json_decode($response, true)["requestId"];
                 }
             }
-            return array("success" => false,
-                    "code" => $response_info["http_code"],
-                    "response" => $response,
-                    "requestId" => $requestId);
+            return array(
+                "success" => false,
+                "code" => $response_info["http_code"],
+                "response" => $response,
+                "requestId" => $requestId
+            );
         } else {
-            return array("success" => true,
-                    "code" => $response_info["http_code"],
-                    "response" => $response,
-                    "requestId" => $this->requestId);
+            return array(
+                "success" => true,
+                "code" => $response_info["http_code"],
+                "response" => $response,
+                "requestId" => $this->requestId
+            );
         }
     }
 
