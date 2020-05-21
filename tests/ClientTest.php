@@ -2,7 +2,9 @@
 
 namespace AmazonAdvertisingApi;
 
-require_once "../AmazonAdvertisingApi/Client.php";
+use AmazonAdvertisingApi\Client;
+use DateTime;
+use Exception;
 
 class ClientTest extends \PHPUnit\Framework\TestCase
 {
@@ -14,11 +16,11 @@ class ClientTest extends \PHPUnit\Framework\TestCase
         "region" => "na",
         "accessToken" => "Atza%7Ctest",
         "refreshToken" => "Atzr%7Ctest",
-        "sandbox" => true
+        "sandbox" => true,
+        "delay" => 0
     );
 
-
-    public function setUp()
+    public function setUp(): void
     {
         $this->return_value = array(
             "code" => "200",
@@ -37,6 +39,37 @@ class ClientTest extends \PHPUnit\Framework\TestCase
             ->will($this->returnValue($this->return_value));
     }
 
+    public function testValidateConfigNotNull()
+    {
+        $testConfig = null;
+        try {
+            $client = new Client($testConfig);
+        } catch (Exception $expected) {
+            $this->assertRegExp("/'config' cannot be null./", strval($expected));
+        }
+    }
+
+    public function testValidateConfigRequiredParams()
+    {
+        $testConfig = $this->config;
+        $testConfig['clientSecret'] = null;
+        try {
+            $client = new Client($testConfig);
+        } catch (Exception $expected) {
+            $this->assertRegExp("/Missing required parameter 'clientSecret'./", strval($expected));
+        }
+    }
+
+    public function testValidateConfigRejectUnknownParameters()
+    {
+        $testConfig = $this->config;
+        $testConfig['not_exists'] = true;
+        try {
+            $client = new Client($testConfig);
+        } catch (Exception $expected) {
+            $this->assertRegExp("/Unknown parameter 'not_exists' in config./", strval($expected));
+        }
+    }
 
     public function testValidateClientId()
     {
@@ -44,7 +77,7 @@ class ClientTest extends \PHPUnit\Framework\TestCase
         $testConfig["clientId"] = "bad";
         try {
             $client = new Client($testConfig);
-        } catch (\Exception $expected) {
+        } catch (Exception $expected) {
             $this->assertRegExp("/Invalid parameter value for clientId./", strval($expected));
         }
     }
@@ -55,8 +88,20 @@ class ClientTest extends \PHPUnit\Framework\TestCase
         $testConfig["clientSecret"] = "bad";
         try {
             $client = new Client($testConfig);
-        } catch (\Exception $expected) {
+        } catch (Exception $expected) {
             $this->assertRegExp("/Invalid parameter value for clientSecret./", strval($expected));
+        }
+    }
+
+    public function testSetEndpointToProduction()
+    {
+        $config = $this->config;
+        $config['sandbox'] = false;
+
+        try {
+            $client = new Client($config);
+            $this->assertEquals('https://advertising-api.amazon.com/v2', $client->getEndpoint());
+        } catch (Exception $e) {
         }
     }
 
@@ -66,7 +111,7 @@ class ClientTest extends \PHPUnit\Framework\TestCase
         $testConfig["region"] = "bad";
         try {
             $client = new Client($testConfig);
-        } catch (\Exception $expected) {
+        } catch (Exception $expected) {
             $this->assertRegExp("/Invalid region./", strval($expected));
         }
     }
@@ -77,7 +122,7 @@ class ClientTest extends \PHPUnit\Framework\TestCase
         $testConfig["accessToken"] = "bad";
         try {
             $client = new Client($testConfig);
-        } catch (\Exception $expected) {
+        } catch (Exception $expected) {
             $this->assertRegExp("/Invalid parameter value for accessToken./", strval($expected));
         }
     }
@@ -88,7 +133,7 @@ class ClientTest extends \PHPUnit\Framework\TestCase
         $testConfig["refreshToken"] = "bad";
         try {
             $client = new Client($testConfig);
-        } catch (\Exception $expected) {
+        } catch (Exception $expected) {
             $this->assertRegExp("/Invalid parameter value for refreshToken./", strval($expected));
         }
     }
@@ -99,8 +144,30 @@ class ClientTest extends \PHPUnit\Framework\TestCase
         $testConfig["sandbox"] = "bad";
         try {
             $client = new Client($testConfig);
-        } catch (\Exception $expected) {
+        } catch (Exception $expected) {
             $this->assertRegExp("/Invalid parameter value for sandbox./", strval($expected));
+        }
+    }
+
+    public function testValidateDelayType()
+    {
+        $testConfig = $this->config;
+        $testConfig["delay"] = "0";
+        try {
+            $client = new Client($testConfig);
+        } catch (Exception $expected) {
+            $this->assertRegExp("/Invalid parameter value for delay, expected int got string./", strval($expected));
+        }
+    }
+
+    public function testValidateDelayValue()
+    {
+        $testConfig = $this->config;
+        $testConfig["delay"] = -1;
+        try {
+            $client = new Client($testConfig);
+        } catch (Exception $expected) {
+            $this->assertRegExp("/Invalid parameter value for delay, expected positive int got negative./", strval($expected));
         }
     }
 
@@ -218,7 +285,7 @@ class ClientTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($this->return_value, $request);
     }
 
-    public function updateCreateBiddableKeywords()
+    public function testUpdateCreateBiddableKeywords()
     {
         $request = $this->client->updateBiddableKeywords("test");
         $this->assertEquals($this->return_value, $request);
@@ -382,7 +449,7 @@ class ClientTest extends \PHPUnit\Framework\TestCase
 
     public function testBulkGetKeywordBidRecommendations()
     {
-        $request = $this->client->getKeywordBidRecommendations("test");
+        $request = $this->client->bulkGetKeywordBidRecommendations(123, "test");
         $this->assertEquals($this->return_value, $request);
     }
 
@@ -430,6 +497,28 @@ class ClientTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($this->return_value, $request);
     }
 
+    public function testGetSnapshotFailed()
+    {
+        $this->return_value = array(
+            "code" => "422",
+            "success" => false,
+            "requestId" => "test",
+            "response" => json_encode(["status" => "SUCCESS", "location" => ''])
+        );
+
+        $this->client = $this->getMockBuilder("AmazonAdvertisingApi\Client")
+            ->setConstructorArgs(array($this->config))
+            ->setMethods(array("_executeRequest"))
+            ->getMock();
+
+        $this->client->expects($this->any())
+            ->method("_executeRequest")
+            ->will($this->returnValue($this->return_value));
+
+        $request = $this->client->getSnapshot("test");
+        $this->assertEquals($this->return_value, $request);
+    }
+
     public function testRequestReport()
     {
         $request = $this->client->requestReport("test");
@@ -438,6 +527,28 @@ class ClientTest extends \PHPUnit\Framework\TestCase
 
     public function testGetReport()
     {
+        $request = $this->client->getReport("test");
+        $this->assertEquals($this->return_value, $request);
+    }
+
+    public function testGetReportFailed()
+    {
+        $this->return_value = array(
+            "code" => "422",
+            "success" => false,
+            "requestId" => "test",
+            "response" => json_encode(["status" => "SUCCESS", "location" => ''])
+        );
+
+        $this->client = $this->getMockBuilder("AmazonAdvertisingApi\Client")
+            ->setConstructorArgs(array($this->config))
+            ->setMethods(array("_executeRequest"))
+            ->getMock();
+
+        $this->client->expects($this->any())
+            ->method("_executeRequest")
+            ->will($this->returnValue($this->return_value));
+
         $request = $this->client->getReport("test");
         $this->assertEquals($this->return_value, $request);
     }
@@ -476,5 +587,40 @@ class ClientTest extends \PHPUnit\Framework\TestCase
     {
         $request = $this->client->updatePortfolios("test");
         $this->assertEquals($this->return_value, $request);
+    }
+
+    public function testRegisterProfile()
+    {
+        $request = $this->client->registerProfile("test");
+        $this->assertEquals($this->return_value, $request);
+    }
+
+    public function testRegisterProfileStatus()
+    {
+        $request = $this->client->registerProfileStatus("test");
+        $this->assertEquals($this->return_value, $request);
+    }
+
+    public function testUpdateCampaignWithDelay()
+    {
+        $config = $this->config;
+        $config['delay'] = 1;
+        $this->client = $this->getMockBuilder("AmazonAdvertisingApi\Client")
+            ->setConstructorArgs(array($config))
+            ->setMethods(array("_executeRequest"))
+            ->getMock();
+
+        $this->client->expects($this->any())
+            ->method("_executeRequest")
+            ->will($this->returnValue($this->return_value));
+
+        $firstTime = new DateTime();
+        $request = $this->client->updateCampaigns("test");
+        $this->assertEquals($this->return_value, $request);
+
+        $request = $this->client->updateCampaigns("test");
+        $secondTime = new DateTime();
+        $this->assertEquals($this->return_value, $request);
+        $this->assertTrue($secondTime->diff($firstTime)->s > 1);
     }
 }

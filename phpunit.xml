@@ -8,13 +8,13 @@
 
     <filter>
         <whitelist>
-            <directory>.</directory>
+            <directory suffix=".php">AmazonAdvertisingApi</directory>
         </whitelist>
     </filter>
 
     <testsuites>
         <testsuite name="Unit Tests">
-            <directory>.</directory>
+            <directory suffix=".php">tests</directory>
         </testsuite>
     </testsuites>
 </phpunit>

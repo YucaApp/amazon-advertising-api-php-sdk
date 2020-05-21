@@ -32,5 +32,8 @@
             "type": "vcs",
             "url": "https://github.com/amzn/amazon-advertising-api-php-sdk"
         }
-    ]
+    ],
+    "require-dev": {
+        "phpunit/phpunit": "^8.5"
+    }
 }

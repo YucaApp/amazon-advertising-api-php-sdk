@@ -14,7 +14,8 @@ class Client
         "region" => null,
         "accessToken" => null,
         "refreshToken" => null,
-        "sandbox" => false
+        "sandbox" => false,
+        "delay" => 0,
     );
 
     private $apiVersion = null;
@@ -48,6 +49,11 @@ class Client
             /* convenience */
             $this->doRefreshToken();
         }
+    }
+
+    public function getEndpoint()
+    {
+        return $this->endpoint;
     }
 
     public function doRefreshToken()
@@ -478,6 +484,10 @@ class Client
             array_push($headers, "Amazon-Advertising-API-Scope: {$this->profileId}");
         }
 
+        if ($this->config['delay'] > 0) {
+            sleep($this->config['delay']);
+        }
+
         $request = new CurlRequest();
         $url = "{$this->endpoint}/{$interface}";
         $this->requestId = null;
@@ -571,6 +581,7 @@ class Client
             if (is_null($v) && $k !== "accessToken" && $k !== "refreshToken") {
                 $this->_logAndThrow("Missing required parameter '{$k}'.");
             }
+
             switch ($k) {
                 case "clientId":
                     if (!preg_match("/^amzn1\.application-oa2-client\.[a-z0-9]{32}$/i", $v)) {
@@ -599,6 +610,15 @@ class Client
                 case "sandbox":
                     if (!is_bool($v)) {
                         $this->_logAndThrow("Invalid parameter value for sandbox.");
+                    }
+                    break;
+                case "delay":
+                    if (!is_int($v)) {
+                        $type = gettype($v);
+                        $this->_logAndThrow("Invalid parameter value for delay, expected int got {$type}.");
+                    }
+                    if ($v < 0) {
+                        $this->_logAndThrow("Invalid parameter value for delay, expected positive int got negative.");
                     }
                     break;
             }
