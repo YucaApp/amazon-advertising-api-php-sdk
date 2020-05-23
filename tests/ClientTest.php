@@ -604,7 +604,7 @@ class ClientTest extends \PHPUnit\Framework\TestCase
     public function testUpdateCampaignWithDelay()
     {
         $config = $this->config;
-        $config['delay'] = 1;
+        $config['delay'] = 1000;
         $this->client = $this->getMockBuilder("AmazonAdvertisingApi\Client")
             ->setConstructorArgs(array($config))
             ->setMethods(array("_executeRequest"))

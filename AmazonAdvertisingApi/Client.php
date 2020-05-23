@@ -485,7 +485,7 @@ class Client
         }
 
         if ($this->config['delay'] > 0) {
-            sleep($this->config['delay']);
+            usleep($this->config['delay'] * 1000);
         }
 
         $request = new CurlRequest();
