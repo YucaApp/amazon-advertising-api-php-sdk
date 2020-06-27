@@ -623,4 +623,10 @@ class ClientTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($this->return_value, $request);
         $this->assertTrue($secondTime->diff($firstTime)->s > 1);
     }
+
+    public function testSearchTermsReport()
+    {
+        $request = $this->client->searchTermsReport("test");
+        $this->assertEquals($this->return_value, $request);
+    }
 }

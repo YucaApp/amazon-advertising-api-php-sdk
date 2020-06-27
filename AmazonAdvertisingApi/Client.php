@@ -442,6 +442,15 @@ class Client
         return $this->_operation("portfolios", $data, "PUT");
     }
 
+    public function searchTermsReport($date)
+    {
+        return $this->_operation("sp/targets/report", [
+            'segment' => 'query',
+            'reportDate' => $date,
+            "metrics" => "impressions,clicks"
+        ], "POST");
+    }
+
     private function _download($location, $gunzip = false)
     {
         $headers = array();
