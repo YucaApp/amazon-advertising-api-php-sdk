@@ -629,4 +629,16 @@ class ClientTest extends \PHPUnit\Framework\TestCase
         $request = $this->client->searchTermsReport("test");
         $this->assertEquals($this->return_value, $request);
     }
+
+    public function testGetTargetingClause()
+    {
+        $request = $this->client->getTargetingClause("test");
+        $this->assertEquals($this->return_value, $request);
+    }
+
+    public function testGetTargetingClauseEx()
+    {
+        $request = $this->client->getTargetingClauseEx("test");
+        $this->assertEquals($this->return_value, $request);
+    }
 }

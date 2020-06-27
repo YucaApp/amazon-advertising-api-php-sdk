@@ -451,6 +451,16 @@ class Client
         ], "POST");
     }
 
+    public function getTargetingClause($targetId)
+    {
+        return $this->_operation("sp/targets/{$targetId}", [], "GET");
+    }
+
+    public function getTargetingClauseEx($targetId)
+    {
+        return $this->_operation("sp/targets/extended/{$targetId}", [], "GET");
+    }
+
     private function _download($location, $gunzip = false)
     {
         $headers = array();
